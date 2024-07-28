@@ -2,9 +2,13 @@ from django.db import models
 
 
 class Account(models.Model):
-    balance = models.PositiveIntegerField()
+    name = models.CharField(max_length=100)
+    balance = models.PositiveIntegerField(default=0)
     is_IBAN = models.BooleanField(default=False)
     IBAN = models.CharField(max_length=34,blank=True,null=True)
+
+    def __str__(self) -> str:
+        return str(self.id)
 
 
 class Movement(models.Model):
@@ -21,3 +25,6 @@ class Movement(models.Model):
 
     class Meta:
         ordering = ["date"]
+
+ 
+ 

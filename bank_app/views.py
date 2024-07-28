@@ -1,3 +1,4 @@
+
 from django.shortcuts import render
 from .serializers import AccountSerializer,MovementSerializer
 from .models import Account, Movement
@@ -17,29 +18,27 @@ def depositView(request,pk=None):
     elif request.method == "PATCH":
         try:
             account = Account.objects.get(pk=pk)
-
             serializer = AccountSerializer(account,data=request.data,partial=True)
-            if serializer.is_valid():
-                requestamount = int(request.data.get('amount',0))
-                totalBalance = account.balance + requestamount
-                account.balance = totalBalance
-                movement = {
-                    "movement_type":"Deposit",
-                    "account":account.id,
-                    "amount":requestamount,
-                    "balance":totalBalance,
-                }
-                mov_serializer = MovementSerializer(data=movement)
-                if mov_serializer.is_valid():
-                    mov_serializer.save()
-                else:
-                    return JsonResponse(mov_serializer.errors)
-                serializer.save()
-                return JsonResponse({'msg':'Amount Deposited'})
-            return JsonResponse(serializer.errors)
+            requestamount = int(request.data.get('amount',0))
+            totalBalance = account.balance + requestamount
+            account.balance = totalBalance
+            movement = {
+                "movement_type": "Deposit",
+                "account": account.id,
+                "amount": requestamount,
+                "balance": totalBalance,
+            }
+            mov_serializer = MovementSerializer(data=movement)
 
+            if serializer.is_valid() and mov_serializer.is_valid():
+                serializer.save()
+                mov_serializer.save()
+                return JsonResponse({'msg':'Amount Deposited'})
+            else:
+                return JsonResponse([serializer.errors,mov_serializer.errors],safe=False)
+            
         except Account.DoesNotExist:
-            return JsonResponse({'msg':'Provide Correct Account ID'})
+            return JsonResponse({'msg':'Invalid Account ID'})
 
 
 @api_view(["GET"])
@@ -49,8 +48,3 @@ def statement(request,pk=None):
         serializer = MovementSerializer(statement,many=True)
         return JsonResponse(serializer.data,safe=False)
     return JsonResponse({'msg':'Provide Account ID in the URL'})
-
-
-    
-    
-
