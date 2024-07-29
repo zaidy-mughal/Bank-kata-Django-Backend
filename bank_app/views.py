@@ -3,6 +3,8 @@ from .serializers import AccountSerializer,MovementSerializer
 from .models import Account, Movement
 from rest_framework.views import APIView
 from rest_framework.response import Response
+from rest_framework import generics
+from rest_framework.filters import OrderingFilter,SearchFilter
 # from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 
@@ -93,10 +95,22 @@ class TransferView(APIView):
 
 
 
-class StatementView(APIView):
-    def get(self,request,pk=None,format=None):
+class StatementView(generics.ListAPIView,generics.RetrieveAPIView):
+    
+    serializer_class = MovementSerializer
+
+    def get_queryset(self):
+        pk = self.kwargs.get('pk')
         if pk is not None:
-            statement = Movement.objects.filter(account_id=pk).order_by('-date')
-            serializer = MovementSerializer(statement,many=True)
-            return Response(serializer.data)
-        return Response({'msg':'Provide Account ID in the URL'})
+            return Movement.objects.filter(account_id=pk)
+        return Movement.objects.none()
+
+    #this gives the support to perform filtering and searching
+    filter_backends = [SearchFilter,OrderingFilter]
+    # this provides the options to order by choice
+    ordering_fields = ['date']     
+    # this is used for default ordering of the data   
+    ordering = ['-date']
+    search_fields = ['movement_type','account__id']
+
+    
