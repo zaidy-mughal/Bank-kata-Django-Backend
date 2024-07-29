@@ -2,8 +2,24 @@ from django.shortcuts import render
 from .serializers import AccountSerializer,MovementSerializer
 from .models import Account, Movement
 from rest_framework.views import APIView
-from django.http import JsonResponse
+from rest_framework.response import Response
+# from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
+
+
+def createMovement(movement_type,accountId,requestamount,totalBalance):
+    movement = {
+        "movement_type": movement_type,
+        "account": accountId,
+        "amount": requestamount,
+        "balance": totalBalance,
+    }
+    mov_serializer = MovementSerializer(data=movement)
+    if mov_serializer.is_valid():
+        mov_serializer.save()
+    else:
+        return Response(mov_serializer.errors)
+
 
 
 
@@ -14,7 +30,7 @@ class DepositView(APIView):
             serializer = AccountSerializer(account,many=True)
         account = Account.objects.get(pk=pk)
         serializer = AccountSerializer(account)
-        return JsonResponse(serializer.data,safe=False)
+        return Response(serializer.data)
 
 
     def post(self,request,pk=None,format=None):
@@ -24,23 +40,16 @@ class DepositView(APIView):
             requestamount = int(request.data.get('amount',0))
             totalBalance = account.balance + requestamount
             account.balance = totalBalance
-            movement = {
-                "movement_type": "Deposit",
-                "account": account.id,
-                "amount": requestamount,
-                "balance": totalBalance,
-            }
-            mov_serializer = MovementSerializer(data=movement)
 
-            if serializer.is_valid() and mov_serializer.is_valid():
+            if serializer.is_valid():
+                createMovement("Deposit",account.id,requestamount,totalBalance)
                 serializer.save()
-                mov_serializer.save()
-                return JsonResponse({'msg':'Amount Deposited'})
+                return Response({'msg':'Amount Deposited'})
             else:
-                return JsonResponse([serializer.errors,mov_serializer.errors],safe=False)
+                return Response(serializer.errors)
             
         except Account.DoesNotExist:
-            return JsonResponse({'msg':'Invalid Account ID'})
+            return Response({'msg':'Invalid Account ID'})
 
 
 
@@ -51,7 +60,7 @@ class WithdrawView(APIView):
             serializer = AccountSerializer(account,many=True)
         account = Account.objects.get(pk=pk)
         serializer = AccountSerializer(account)
-        return JsonResponse(serializer.data,safe=False)
+        return Response(serializer.data)
 
 
     def post(self,request,pk=None,format=None):
@@ -63,35 +72,31 @@ class WithdrawView(APIView):
             if requestamount <= account.balance:
                 totalBalance = account.balance - requestamount
             else:
-                return JsonResponse({'msg':'Low Balance!'})
+                return Response({'msg':'Low Balance!'})
             
-            account.balance = totalBalance
-            movement = {
-                "movement_type": "Withdraw",
-                "account": account.id,
-                "amount": -requestamount,
-                "balance": totalBalance,
-            }
-            mov_serializer = MovementSerializer(data=movement)
-
-            if serializer.is_valid() and mov_serializer.is_valid():
+            if serializer.is_valid():
+                createMovement("Withdraw",account.id,-requestamount,totalBalance)
                 serializer.save()
-                mov_serializer.save()
-                return JsonResponse({'msg':'Amount Withdrawed'})
+                return Response({'msg':'Amount Withdrawed'})
             else:
-                return JsonResponse([serializer.errors,mov_serializer.errors],safe=False)
+                return Response(serializer.errors)
             
         except Account.DoesNotExist:
-            return JsonResponse({'msg':'Invalid Account ID'})
+            return Response({'msg':'Invalid Account ID'})
 
 
+
+
+class TransferView(APIView):
+    def put(self,request,pk=None,format=None):
+        pass
 
 
 
 class StatementView(APIView):
     def get(self,request,pk=None,format=None):
         if pk is not None:
-            statement = Movement.objects.filter(account_id=pk)
+            statement = Movement.objects.filter(account_id=pk).order_by('-date')
             serializer = MovementSerializer(statement,many=True)
-            return JsonResponse(serializer.data,safe=False)
-        return JsonResponse({'msg':'Provide Account ID in the URL'})
+            return Response(serializer.data)
+        return Response({'msg':'Provide Account ID in the URL'})
