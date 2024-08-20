@@ -13,7 +13,7 @@ class Account(models.Model):
     
     name = models.CharField(max_length=100)
     balance = models.PositiveIntegerField(default=0)
-    IBAN = models.CharField(max_length=34,blank=True,null=True)
+    IBAN = models.CharField(max_length=34,unique=True)
 
     def __str__(self) -> str:
         return str(self.name)
