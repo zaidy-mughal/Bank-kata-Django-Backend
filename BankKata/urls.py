@@ -2,6 +2,7 @@ from django.contrib import admin
 from django.urls import path
 from bank_app import views
 
+from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -11,4 +12,6 @@ urlpatterns = [
     path('account/<int:pk>/deposit',views.deposit,name="Deposit Amount"),
     path('account/<int:pk>/withdraw',views.withdraw,name="Withdraw Amount"),
     path('account/transfer',views.transfer,name="Transfer Amount"),
+    path('schema/',SpectacularAPIView.as_view(),name="schema"),
+    path('schema/docs',SpectacularSwaggerView.as_view(url_name="schema"),name="Schema Docs"),
 ]

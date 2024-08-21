@@ -10,8 +10,10 @@ from rest_framework.decorators import api_view
 from rest_framework.filters import OrderingFilter,SearchFilter
 from rest_framework import status
 from .pagination import CustomPageNubmerPagination
+from drf_spectacular.utils import extend_schema
 
 
+@extend_schema(tags=['Accounts'])
 class Accounts(generics.ListCreateAPIView):
     queryset = Account.objects.all()
     serializer_class = AccountSerializer
@@ -23,7 +25,7 @@ class Accounts(generics.ListCreateAPIView):
         return super().post(request, *args, **kwargs)
     
 
-
+@extend_schema(tags=['Account Details'])
 class AccountDetails(generics.RetrieveUpdateDestroyAPIView):
     queryset = Account.objects.all()
     serializer_class = AccountSerializer
@@ -38,6 +40,7 @@ class AccountDetails(generics.RetrieveUpdateDestroyAPIView):
         return super().destroy(request, *args, **kwargs)
     
 
+@extend_schema(tags=['Account Statement'])
 class AccountStatement(generics.ListAPIView):
     """
     View to get account Statement
@@ -61,7 +64,7 @@ class AccountStatement(generics.ListAPIView):
     search_fields = ['movement_type','account__id']
     
 
-
+@extend_schema(tags=['Deposit'])
 @api_view(['POST'])
 def deposit(request,pk):
     """
@@ -83,7 +86,7 @@ def deposit(request,pk):
 
 
 
-
+@extend_schema(tags=['Withdraw'])
 @api_view(['POST'])
 def withdraw(request,pk):
 
@@ -112,7 +115,7 @@ def withdraw(request,pk):
     
 
 
-
+@extend_schema(tags=['Transfer'])
 @api_view(['POST'])
 def transfer(request):
     """
