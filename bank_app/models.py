@@ -12,7 +12,7 @@ class Account(models.Model):
     """
     
     name = models.CharField(max_length=100)
-    balance = models.PositiveIntegerField(default=0)
+    balance = models.DecimalField(default=0,max_digits=10,decimal_places=2)
     IBAN = models.CharField(max_length=34,unique=True)
 
     def __str__(self) -> str:
@@ -41,8 +41,8 @@ class Movement(models.Model):
     movement_type = models.CharField(choices=MOVEMENT_CHOICES,max_length=10)
     account = models.ForeignKey(Account,on_delete=models.CASCADE)
     date = models.DateTimeField(auto_now_add=True)
-    amount = models.IntegerField()
-    balance = models.PositiveIntegerField()
+    amount = models.DecimalField(max_digits=10,decimal_places=2)
+    balance = models.DecimalField(max_digits=10,decimal_places=2)
 
     class Meta:
         ordering = ["date"]

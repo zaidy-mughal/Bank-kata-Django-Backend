@@ -9,6 +9,7 @@ from rest_framework import generics
 from rest_framework.decorators import api_view
 from rest_framework.filters import OrderingFilter,SearchFilter
 from rest_framework import status
+from .pagination import CustomPageNubmerPagination
 
 
 class Accounts(generics.ListCreateAPIView):
@@ -49,6 +50,7 @@ class AccountStatement(generics.ListAPIView):
             return Movement.objects.filter(account_id=pk)
         return Movement.objects.none()
 
+    pagination_class = CustomPageNubmerPagination
     #this gives the support to perform filtering and searching
     filter_backends = [SearchFilter,OrderingFilter]
     # this provides the options to order by choice
