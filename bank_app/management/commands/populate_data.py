@@ -40,11 +40,12 @@ class Command(BaseCommand):
                 else:
                     if movement_type == "Withdraw" and account.balance < amount:
                         amount = account.balance
-                    Movement.objects.create(account=account, amount=amount, balance = account.balance, movement_type=movement_type)
+                    
                     if movement_type == "Deposit":
                         account.balance += amount
                     else:
                         account.balance -= amount
                     account.save()
+                    Movement.objects.create(account=account, amount=amount, balance = account.balance, movement_type=movement_type)
 
         self.stdout.write(self.style.SUCCESS('Successfully populated the database with dummy data'))

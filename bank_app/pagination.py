@@ -26,7 +26,7 @@ class CustomPageNubmerPagination(PageNumberPagination):
     
     def _get_link(self,page_number):
         request = self.request
-        url = self.build_absolute_url()
+        url = self.request.build_absolute_uri()
         query_params = request.query_params.copy()
         query_params['page'] = page_number
         return f"{url}?{query_params.urlencode()}"
