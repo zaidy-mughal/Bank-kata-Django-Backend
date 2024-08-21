@@ -8,3 +8,5 @@ pip install djangorestframework
 pip freeze > requirements.txt
 pip install -r requirements.txt
 pip install faker
+django-admin startproject BankKata .
+django-admin startapp bank_app
